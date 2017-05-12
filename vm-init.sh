@@ -23,7 +23,7 @@ SELINUX() {
 	S=$(sestatus  |grep 'SELinux status'  |awk '{print $NF}')
 	if [ "$S" = "enabled" ]; then 
 		Print "NL" "Enabled.." "R"
-		Print "SL" "Disabling SELINUX.." B
+		Print "SL" "+>> Disabling SELINUX.." B
 		sed -i -e '/^SELINUX/ c SELINUX=disabled' /etc/selinux/config
 		Print "NL" "Success" G
 		rreq=yes
@@ -35,7 +35,7 @@ SELINUX() {
 PACK() {
 
 	Print SL "=>> Installing base Packages.. " B
-	yum install wget zip unzip gzip vim net-tools -y &>/dev/null
+	yum install wget zip unzip gzip vim net-tools facter -y &>/dev/null
 	Print NL Success G
 }
 
@@ -43,13 +43,13 @@ LENV() {
 
 	Print SL "=>> Setting Enviornment.. " B
 	sed -i -e '/TCPKeepAlive/ c TCPKeepAlive yes' -e '/ClientAliveInterval/ c ClientAliveInterval 10' /etc/ssh/sshd_config
-	curl https://raw.githubusercontent.com/versionit/docs/master/ps1.sh > /etc/profile.d/ps1.sh &>/dev/null
+	curl https://raw.githubusercontent.com/versionit/docs/master/ps1.sh > /etc/profile.d/ps1.sh 2>/dev/null
 	chmod +x /etc/profile.d/ps1.sh
 	
 	curl https://raw.githubusercontent.com/versionit/docs/master/idle.sh -o /boot/idle.sh &>/dev/null
 	chmod +x /boot/idle.sh
 	sed -i -e '/idle/ d' /var/spool/cron/root &>/dev/null
-	echo "*/10 * * * * /boot/idle.sh" >/var/spool/cron/root
+	echo "*/10 * * * * sh -x /boot/idle.sh &>/tmp/idle.out" >/var/spool/cron/root
 	chmod 600 /var/spool/cron/root
 	
 	echo -e "LANG=en_US.utf-8\nLC_ALL=en_US.utf-8" >/etc/environment
@@ -85,7 +85,6 @@ if [ $(rpm -qa |grep ^base |awk -F . '{print $(NF-1)}') = "el6" ]; then
 fi 
 
 
-Print "SL" "=>> Checking SELINUX.. " "B"
 SELINUX
 Print "SL" "=>> Disabling Firewall.. " "B"
 systemctl disable firewalld &>/dev/null

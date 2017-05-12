@@ -35,7 +35,7 @@ if [ $c -eq 0 ]; then
 	if [ ! -f /var/log/idle ]; then 
 		lastcheck=no
 		ts=$(date +"%F %T" |date +%s)
-		echo "no:$s" >/var/log/idle
+		echo "no:$ts" >/var/log/idle
 	else
 		lastcheck=yes
 		ts=$(date +"%F %T" |date +%s)
